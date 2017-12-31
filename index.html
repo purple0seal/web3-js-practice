@@ -44,26 +44,91 @@
             web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
         }
 
-        web3.eth.defaultAccount = web3.eth.accounts[0];
+        web3.eth.defaultAccount = web3.eth.accounts[4];
 
-        const PersonContract = web3.eth.contract([{"constant":false,"inputs":[{"name":"n","type":"string"},{"name":"a","type":"uint256"}],"name":"setInstructor","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getInstructor","outputs":[{"name":"","type":"string"},{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"name","type":"string"},{"indexed":false,"name":"age","type":"uint256"}],"name":"Instructor","type":"event"}]);
+        const PersonContract = web3.eth.contract([
+            {
+                "constant": true,
+                "inputs": [],
+                "name": "getInstructor",
+                "outputs": [
+                    {
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "payable": false,
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": false,
+                        "name": "name",
+                        "type": "string"
+                    },
+                    {
+                        "indexed": false,
+                        "name": "age",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "Instructor",
+                "type": "event"
+            },
+            {
+                "constant": false,
+                "inputs": [
+                    {
+                        "name": "n",
+                        "type": "string"
+                    },
+                    {
+                        "name": "a",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "setInstructor",
+                "outputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "payable": false,
+                "stateMutability": "nonpayable",
+                "type": "constructor"
+            }
+        ]);
 
-        var Person = PersonContract.at('0x23c5bdaa1ea74ac4df23dd4e62c2460b62c3a115');
+        var Person = PersonContract.at('0x903fdb5acb2545784fad549eff29c96e0986d941');
         var instructorEvent = Person.Instructor();
 
         instructorEvent.watch((error, result) => {
             if (!error) {
-                $("#instructor").html(result.args.name+' ('+result.args.age+' years old)');
+                $("#instructor").html(result.args.name + ' (' + result.args.age + ' years old)');
             } else {
                 console.log(error)
             }
             $('#loading').html('');
         })
 
-        $("#button").click(function() {
+        $("#button").click(function () {
             $('#loading').html('loading...')
 
-            Person.setInstructor($("#name").val(), $("#age").val());
+            Person.setInstructor($("#name").val(), $("#age").val(), (err, result) => {
+                if (err) {
+                    console.log(err)
+                    $('#loading').html('')
+                }
+            });
         });
     </script>
 
