@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Web3JS</title>
 
     <link rel="stylesheet" type="text/css" href="main.css">
 
@@ -19,6 +19,8 @@
         <h1>Coursetro Instructor</h1>
 
         <h2 id="instructor"></h2>
+
+        <p id="loading"></p>
 
         <label for="name" class="col-lg-2 control-label">Instructor Name</label>
         <input id="name" type="text">
@@ -36,30 +38,32 @@
 
     <script>
         if (typeof web3 !== 'undefined') {
-            web3 = new Web3(web3.currentProvider);
+            web3 = new Web3(web3.currentProvider)
         } else {
             // set the provider you want from Web3.providers
-            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
         }
 
         web3.eth.defaultAccount = web3.eth.accounts[0];
 
-        var CoursetroContract = web3.eth.contract([{"constant":false,"inputs":[{"name":"n","type":"string"},{"name":"a","type":"uint256"}],"name":"setInstructor","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getInstructor","outputs":[{"name":"","type":"string"},{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}]);
-        var Coursetro = CoursetroContract.at('0xf114f9e58bcc858670d274381f99e52bf3a56fd1');
-        console.log(Coursetro);
+        const PersonContract = web3.eth.contract([{"constant":false,"inputs":[{"name":"n","type":"string"},{"name":"a","type":"uint256"}],"name":"setInstructor","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"getInstructor","outputs":[{"name":"","type":"string"},{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"anonymous":false,"inputs":[{"indexed":false,"name":"name","type":"string"},{"indexed":false,"name":"age","type":"uint256"}],"name":"Instructor","type":"event"}]);
 
-        Coursetro.getInstructor(function(error, result){
-            if(!error)
-                {
-                    $("#instructor").html(result[0]+' ('+result[1]+' years old)');
-                    console.log(result);
-                }
-            else
-                console.error(error);
-        });
+        var Person = PersonContract.at('0x23c5bdaa1ea74ac4df23dd4e62c2460b62c3a115');
+        var instructorEvent = Person.Instructor();
+
+        instructorEvent.watch((error, result) => {
+            if (!error) {
+                $("#instructor").html(result.args.name+' ('+result.args.age+' years old)');
+            } else {
+                console.log(error)
+            }
+            $('#loading').html('');
+        })
 
         $("#button").click(function() {
-            Coursetro.setInstructor($("#name").val(), $("#age").val());
+            $('#loading').html('loading...')
+
+            Person.setInstructor($("#name").val(), $("#age").val());
         });
     </script>
 
